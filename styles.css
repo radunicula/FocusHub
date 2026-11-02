@@ -1,0 +1,627 @@
+/* ==========================================================================
+   Dashboard de Productivitate (styles.css)
+   Stiluri pentru Glassmorphism dinamic, Temă Întunecată/Luminoasă, Culori de Accent,
+   Workspaces, Calendar, Markdown, Drag-and-Drop panouri, link-uri & sarcini
+   ========================================================================== */
+
+:root {
+  /* Culoarea de accent implicită: Emerald (RGB triplets pentru Tailwind alpha support) */
+  --accent-100: 209 250 229;
+  --accent-200: 167 243 208;
+  --accent-300: 110 231 183;
+  --accent-400: 52 211 153;
+  --accent-500: 16 185 129;
+  --accent-600: 5 150 105;
+  --accent-700: 4 120 87;
+
+  --glass-opacity: 0.56;
+  --glass-blur: 22px;
+  --glass-bg: rgba(15, 23, 42, var(--glass-opacity));
+  --glass-bg-active: rgba(15, 23, 42, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.09);
+  --glass-shadow: 0 22px 50px -12px rgba(0, 0, 0, 0.6);
+  --overlay-dim: 0.22;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #090d16;
+  color: #f8fafc;
+}
+
+#bg-layer {
+  filter: contrast(1.04) saturate(1.06);
+}
+
+/* Overlay-ul de întunecare a fundalului (fără blur pe imaginea de fundal, pentru claritate maximă) */
+#bg-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 6, 23, calc(var(--overlay-dim) * 0.75)),
+    rgba(2, 6, 23, calc(var(--overlay-dim) * 0.55)),
+    rgba(2, 6, 23, calc(var(--overlay-dim) * 1.05))
+  );
+}
+
+/* Panourile principale cu efect de sticlă mată (Glassmorphism dinamic) */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(165%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 0 var(--glass-highlight);
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Pastile și controale din header/footer */
+.glass-pill {
+  background: rgba(15, 23, 42, calc(var(--glass-opacity) * 0.9));
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.45);
+}
+
+/* ==========================================================================
+   TEMĂ LUMINOASĂ PENTRU PANOURI (body.theme-light)
+   ========================================================================== */
+body.theme-light {
+  --glass-bg: rgba(248, 250, 252, calc(0.68 + var(--glass-opacity) * 0.28));
+  --glass-bg-active: rgba(255, 255, 255, 0.94);
+  --glass-border: rgba(15, 23, 42, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.75);
+  --glass-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.32);
+}
+
+body.theme-light .glass-panel {
+  color: #0f172a;
+}
+
+body.theme-light .glass-panel:hover {
+  border-color: rgba(15, 23, 42, 0.24);
+}
+
+body.theme-light .glass-panel .text-white,
+body.theme-light .glass-panel .text-white\/95,
+body.theme-light .glass-panel .text-white\/90,
+body.theme-light .glass-panel .text-white\/85,
+body.theme-light .glass-panel .text-white\/80 {
+  color: #0f172a !important;
+}
+
+body.theme-light .glass-panel .text-white\/75,
+body.theme-light .glass-panel .text-white\/70,
+body.theme-light .glass-panel .text-white\/65,
+body.theme-light .glass-panel .text-white\/60 {
+  color: #334155 !important;
+}
+
+body.theme-light .glass-panel .text-white\/55,
+body.theme-light .glass-panel .text-white\/50,
+body.theme-light .glass-panel .text-white\/45,
+body.theme-light .glass-panel .text-white\/40,
+body.theme-light .glass-panel .text-white\/35 {
+  color: #64748b !important;
+}
+
+body.theme-light .glass-panel .border-white\/10,
+body.theme-light .glass-panel .border-white\/15 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.theme-light .glass-panel input:not([type="checkbox"]):not([type="range"]),
+body.theme-light .glass-panel textarea,
+body.theme-light .glass-panel select {
+  background: rgba(255, 255, 255, 0.75) !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.18) !important;
+}
+
+body.theme-light .glass-panel input::placeholder,
+body.theme-light .glass-panel textarea::placeholder {
+  color: #64748b !important;
+}
+
+body.theme-light .subgroup-block {
+  background: rgba(15, 23, 42, 0.045);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+body.theme-light .subgroup-header {
+  background: rgba(15, 23, 42, 0.04);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+
+body.theme-light .quick-link-row,
+body.theme-light .quick-link-card {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+body.theme-light .quick-link-row:hover,
+body.theme-light .quick-link-card:hover {
+  background: rgb(var(--accent-500) / 0.14);
+  border-color: rgb(var(--accent-500) / 0.35);
+}
+
+body.theme-light .glass-panel .text-sky-300,
+body.theme-light .glass-panel .text-sky-300\/90,
+body.theme-light .glass-panel .text-sky-200 {
+  color: #0369a1 !important;
+}
+
+body.theme-light .glass-panel .text-accent-300,
+body.theme-light .glass-panel .text-accent-200 {
+  color: rgb(var(--accent-700)) !important;
+}
+
+body.theme-light .glass-panel .text-amber-300,
+body.theme-light .glass-panel .text-amber-200 {
+  color: #b45309 !important;
+}
+
+/* ==========================================================================
+   TAB-URI SPAȚII DE LUCRU & OPȚIUNI MENIURI
+   ========================================================================== */
+.workspace-tab {
+  color: rgba(255, 255, 255, 0.65);
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+}
+
+.workspace-tab:hover {
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.workspace-tab.active {
+  color: #ffffff;
+  background: rgb(var(--accent-500) / 0.24);
+  border-color: rgb(var(--accent-400) / 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Butoane din meniul „Adaugă panou” */
+.add-widget-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.85rem;
+  text-align: left;
+  transition: background-color 0.15s ease, transform 0.12s ease;
+}
+
+.add-widget-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(2px);
+}
+
+body.theme-light .add-widget-option:hover {
+  background: rgba(15, 23, 42, 0.07);
+}
+
+.add-widget-option span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.add-widget-option strong {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.add-widget-option small {
+  font-size: 0.65rem;
+  opacity: 0.6;
+  line-height: 1.25;
+}
+
+/* Butoane Temă (Întunecată / Luminoasă) */
+.theme-option-btn {
+  color: rgba(255, 255, 255, 0.65);
+  transition: all 0.15s ease;
+}
+
+.theme-option-btn.active {
+  background: rgb(var(--accent-500) / 0.28);
+  color: #ffffff;
+  font-weight: 600;
+  border: 1px solid rgb(var(--accent-400) / 0.45);
+}
+
+body.theme-light .theme-option-btn {
+  color: #475569;
+}
+
+body.theme-light .theme-option-btn.active {
+  color: #0f172a;
+}
+
+.accent-slider {
+  accent-color: rgb(var(--accent-400));
+}
+
+/* ==========================================================================
+   WIDGET-URI POZIȚIONABILE LIBER PE ECRAN
+   ========================================================================== */
+.draggable-widget {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 1.35rem;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: left, top, width, height;
+}
+
+.draggable-widget.is-dragging {
+  background: var(--glass-bg-active);
+  border-color: rgb(var(--accent-400) / 0.6);
+  box-shadow:
+    0 32px 70px -12px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgb(var(--accent-400) / 0.35);
+  user-select: none;
+}
+
+@keyframes pulseHighlight {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  50% {
+    border-color: rgb(var(--accent-400));
+    box-shadow: 0 0 0 3px rgb(var(--accent-400) / 0.35), 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  }
+}
+
+.widget-pulse-highlight {
+  animation: pulseHighlight 1.2s ease-in-out 2;
+}
+
+/* Bara de sus a fiecărui widget de care poate fi tras oriunde */
+.widget-drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.widget-drag-handle:active,
+.is-dragging .widget-drag-handle {
+  cursor: grabbing;
+}
+
+/* Mâner discret de redimensionare în colțul dreapta-jos al fiecărui widget */
+.widget-resize-handle {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+.draggable-widget:hover .widget-resize-handle {
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   SCURTĂTURI RAPIDE & SUBGRUPURI
+   ========================================================================== */
+.subgroup-block {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.subgroup-block:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.subgroup-block.drag-over-subgroup,
+.todo-list-dropzone.drag-over-todo-list {
+  border-color: rgb(var(--accent-400) / 0.75) !important;
+  background: rgb(var(--accent-500) / 0.1) !important;
+}
+
+.subgroup-header {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.subgroup-block.is-collapsed .subgroup-header {
+  border-bottom-color: transparent;
+}
+
+/* Rândurile ultra-compacte pentru Scurtături Rapide (unul sub altul) */
+.quick-link-row {
+  position: relative;
+  min-height: 27px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  transition: all 0.14s ease;
+}
+
+.quick-link-row:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.25);
+  transform: translateX(2px);
+}
+
+.quick-link-row.is-link-dragging,
+.quick-link-card.is-link-dragging,
+.todo-item-row.is-todo-dragging {
+  opacity: 0.4;
+}
+
+.quick-link-row.drag-over-target,
+.quick-link-card.drag-over-target,
+.todo-item-row.drag-over-target {
+  border-top: 2px solid rgb(var(--accent-400));
+  background: rgb(var(--accent-500) / 0.16);
+}
+
+/* Cardurile de Quick Links în modul grilă compactă */
+.quick-link-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quick-link-card:hover {
+  background: rgba(56, 189, 248, 0.13);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   TO-DO LIST (FILTRE, PRIORITĂȚI, SCADENȚE)
+   ========================================================================== */
+.todo-filter-btn {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.todo-filter-btn:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.todo-filter-btn.active {
+  background: rgb(var(--accent-500) / 0.24);
+  color: rgb(var(--accent-300));
+  font-weight: 600;
+}
+
+body.theme-light .todo-filter-btn {
+  color: #475569;
+}
+
+body.theme-light .todo-filter-btn.active {
+  color: rgb(var(--accent-700));
+}
+
+/* ==========================================================================
+   MARKDOWN PREVIEW ÎN NOTIȚE (.markdown-body)
+   ========================================================================== */
+.markdown-body {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.markdown-body h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0.35rem 0 0.25rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.markdown-body h2 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0.35rem 0 0.2rem;
+}
+
+.markdown-body h3 {
+  font-size: 0.84rem;
+  font-weight: 600;
+  margin: 0.25rem 0 0.15rem;
+}
+
+.markdown-body p {
+  margin: 0.25rem 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.25rem 0;
+  padding-left: 1.15rem;
+}
+
+.markdown-body ul {
+  list-style-type: disc;
+}
+
+.markdown-body ol {
+  list-style-type: decimal;
+}
+
+.markdown-body li {
+  margin: 0.15rem 0;
+}
+
+.markdown-body li.md-task-item {
+  list-style: none;
+  margin-left: -1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.markdown-body code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.theme-light .markdown-body code {
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.markdown-body blockquote {
+  border-left: 2px solid rgb(var(--accent-400));
+  padding-left: 0.6rem;
+  margin: 0.3rem 0;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+.markdown-body a {
+  color: #38bdf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+body.theme-light .markdown-body a {
+  color: #0284c7;
+}
+
+/* ==========================================================================
+   CALENDAR LUNAR CU NUMĂRUL SĂPTĂMÂNII
+   ========================================================================== */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 2.1rem repeat(7, minmax(0, 1fr));
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.calendar-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.85rem;
+  border-radius: 0.55rem;
+  font-size: 0.72rem;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-cell.is-today {
+  background: rgb(var(--accent-500));
+  color: #022c22;
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgb(var(--accent-500) / 0.45);
+}
+
+.calendar-week-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.85rem;
+  border-radius: 0.45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgb(var(--accent-300));
+  background: rgb(var(--accent-500) / 0.1);
+}
+
+/* ==========================================================================
+   SCROLLBAR & CHECKBOX-URI PERSONALIZATE
+   ========================================================================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+}
+
+body.theme-light .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.custom-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.3rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+body.theme-light .custom-checkbox {
+  border-color: rgba(15, 23, 42, 0.35);
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.custom-checkbox:hover {
+  border-color: rgb(var(--accent-400));
+}
+
+.custom-checkbox:checked {
+  background-color: rgb(var(--accent-500));
+  border-color: rgb(var(--accent-500));
+}
+
+.custom-checkbox:checked::before {
+  content: "";
+  width: 0.48rem;
+  height: 0.28rem;
+  border-left: 2px solid #022c22;
+  border-bottom: 2px solid #022c22;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-item {
+  animation: fadeInSlide 0.16s ease-out forwards;
+}
