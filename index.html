@@ -1,156 +1,148 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FocusHub — Dashboard de Productivitate</title>
+  <title>FocusHub — Productivity Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.svg" />
 
-  <!-- Fonturi locale (Inter & JetBrains Mono) — funcționează și fără internet -->
+  <!-- Local fonts (Inter & JetBrains Mono) — also work offline -->
   <link rel="stylesheet" href="vendor/fonts.css" />
 
-  <!-- Tailwind CSS (copie locală a CDN-ului, pentru funcționare offline) -->
-  <script src="vendor/tailwind.js"></script>
-  <script>
-    // Culoarea de accent este definită prin variabile CSS (--accent-*), ca să poată fi schimbată din Setări
-    const accentShade = (n) => `rgb(var(--accent-${n}) / <alpha-value>)`;
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'system-ui', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            accent: {
-              100: accentShade(100),
-              200: accentShade(200),
-              300: accentShade(300),
-              400: accentShade(400),
-              500: accentShade(500),
-              600: accentShade(600),
-              700: accentShade(700),
-            },
-          },
-        },
-      },
-    };
-  </script>
-
-  <!-- Stiluri personalizate: Glassmorphism, teme, Markdown, Drag & Drop -->
+  <!-- Custom styles: Glassmorphism, themes, Markdown, Drag & Drop -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Precompiled Tailwind CSS (npm run build:css). Loaded after styles.css so utilities keep precedence. -->
+  <link rel="stylesheet" href="vendor/tailwind.css" />
 </head>
 <body class="relative min-h-screen w-full overflow-x-hidden text-white select-none font-sans antialiased">
 
-  <!-- Stratul de Fundal (Imagine Unsplash, imagine proprie sau Gradient) -->
+  <!-- Background layer (Unsplash image, custom image, or gradient) -->
   <div id="bg-layer" class="fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out"></div>
-  <!-- Overlay întunecat ajustabil din Setări Vizuale -->
+  <!-- Dark overlay adjustable in Visual Settings -->
   <div id="bg-overlay" class="fixed inset-0 -z-10 transition-all duration-300"></div>
 
-  <!-- Notificare discretă (Import/Export/Copiere/Erori) -->
+  <!-- Toast notification (import/export/copy/errors) -->
   <div
     id="toast-notification"
     class="pointer-events-none fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] opacity-0 translate-y-2 transition-all duration-300 glass-panel px-4 py-2 rounded-2xl text-xs font-medium text-accent-300 shadow-2xl max-w-md text-center"
   >
-    Salvat cu succes!
+    Saved successfully!
   </div>
 
-  <!-- Notificare „Anulează” după orice ștergere (sau Ctrl+Z) -->
+  <!-- Undo notification after any deletion (or Ctrl+Z) -->
   <div
     id="undo-toast"
     class="hidden fixed bottom-16 left-1/2 -translate-x-1/2 z-[60] glass-panel items-center gap-3 pl-4 pr-2 py-1.5 rounded-2xl text-xs shadow-2xl"
   >
-    <span id="undo-toast-msg" class="text-white/90">Element șters</span>
+    <span id="undo-toast-msg" class="text-white/90">Item deleted</span>
     <button
       id="undo-toast-btn"
       type="button"
       class="font-semibold text-accent-300 hover:text-accent-200 bg-accent-400/15 hover:bg-accent-400/25 px-2.5 py-1 rounded-xl transition-colors"
-      title="Anulează ștergerea (Ctrl+Z)"
+      title="Undo deletion (Ctrl+Z)"
     >
-      ↩ Anulează
+      ↩ Undo
     </button>
   </div>
 
-  <!-- Container Principal -->
-  <div class="relative z-10 flex min-h-screen flex-col justify-between px-4 py-3.5 lg:px-8 lg:py-5">
+  <!-- Main container -->
+  <div class="relative z-10 flex min-h-[100dvh] flex-col justify-between px-4 py-3.5 lg:px-8 lg:py-5 app-shell">
 
-    <!-- ==================== HEADER: Spații de Lucru, Adăugare Panouri, Backup & Vreme ==================== -->
+    <!-- ==================== HEADER: Workspaces, Add Widgets, Backup & Weather ==================== -->
     <header class="relative z-40 flex flex-wrap items-center justify-between gap-2.5">
 
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- On phones this group is "display: contents" so its pills and the weather card share rows -->
+      <div class="contents sm:flex sm:flex-wrap sm:items-center sm:gap-2">
 
-        <!-- 1. COMUTATOR SPAȚII DE LUCRU (WORKSPACES / TAB-URI) -->
+        <!-- 1. WORKSPACE SWITCHER (TABS) -->
         <div
           id="workspaces-bar"
-          aria-label="Spații de lucru"
+          aria-label="Workspaces"
           class="glass-pill flex flex-wrap items-center gap-1 p-1 rounded-2xl"
         >
-          <!-- Tab-urile sunt generate dinamic din app.js -->
+          <!-- Tabs are generated dynamically by app.js -->
         </div>
 
-        <!-- 2. ADĂUGARE PANOU NOU (meniu cu toate tipurile de widget-uri) -->
+        <!-- 2. ADD WIDGET (menu with all widget types) -->
         <div class="glass-pill relative flex items-center p-1 rounded-2xl">
           <button
             id="add-widget-btn"
             type="button"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-accent-300 hover:bg-accent-400/15 transition-all"
-            title="Adaugă un panou nou în spațiul curent"
+            title="Add a new widget to the current workspace"
+            aria-label="Add Widget"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            <span>Adaugă panou</span>
-            <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+            <span class="hidden sm:inline">Add Widget</span>
+            <svg class="hidden sm:block w-3 h-3 opacity-70" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           <div
             id="add-widget-popover"
-            class="hidden absolute left-0 top-full mt-2 w-72 glass-panel rounded-2xl p-2 shadow-2xl z-50 space-y-0.5"
+            class="hidden absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] glass-panel rounded-2xl p-2 shadow-2xl z-50 space-y-0.5"
           >
             <button type="button" data-add-type="links" class="add-widget-option">
               <span class="text-base">🔗</span>
-              <span><strong>Scurtături</strong><small>Link-uri organizate pe subgrupuri</small></span>
+              <span><strong>Quick Links</strong><small>Links organized into subgroups</small></span>
             </button>
             <button type="button" data-add-type="todo" class="add-widget-option">
               <span class="text-base">✅</span>
-              <span><strong>Listă de sarcini</strong><small>Cu termen limită și prioritate</small></span>
+              <span><strong>To-Do List</strong><small>With due dates and priorities</small></span>
             </button>
             <button type="button" data-add-type="notes" class="add-widget-option">
               <span class="text-base">📝</span>
-              <span><strong>Notiță</strong><small>Text liber cu suport Markdown</small></span>
+              <span><strong>Note</strong><small>Free-form text with Markdown support</small></span>
             </button>
             <button type="button" data-add-type="calendar" class="add-widget-option">
               <span class="text-base">📅</span>
-              <span><strong>Calendar</strong><small>Lună curentă cu numărul săptămânilor</small></span>
+              <span><strong>Calendar</strong><small>Current month with week numbers</small></span>
             </button>
             <button type="button" data-add-type="forecast" class="add-widget-option">
               <span class="text-base">🌦️</span>
-              <span><strong>Prognoză 5 zile</strong><small>Temperaturi și șanse de ploaie</small></span>
+              <span><strong>5-Day Forecast</strong><small>Temperatures and chance of rain</small></span>
             </button>
             <button type="button" data-add-type="clocks" class="add-widget-option">
               <span class="text-base">🌍</span>
-              <span><strong>Ceasuri mondiale</strong><small>Ora în alte fusuri orare</small></span>
+              <span><strong>World Clocks</strong><small>Time in other time zones</small></span>
             </button>
             <button type="button" data-add-type="countdown" class="add-widget-option">
               <span class="text-base">⏳</span>
-              <span><strong>Numărătoare inversă</strong><small>Zile rămase până la evenimente</small></span>
+              <span><strong>Countdown</strong><small>Days remaining until events</small></span>
+            </button>
+            <button type="button" data-add-type="snippets" class="add-widget-option">
+              <span class="text-base">⚡</span>
+              <span><strong>Snippets & Commands</strong><small>1-click copy CLI, XCP, Git & templates</small></span>
+            </button>
+            <button type="button" data-add-type="pomodoro" class="add-widget-option">
+              <span class="text-base">🍅</span>
+              <span><strong>Pomodoro Timer</strong><small>Focus timer linked to your tasks</small></span>
+            </button>
+            <button type="button" data-add-type="converters" class="add-widget-option">
+              <span class="text-base">🧮</span>
+              <span><strong>Engineering Converters</strong><small>Hex/Dec/Bin, Endianness, RF & Speed</small></span>
             </button>
           </div>
         </div>
 
-        <!-- 3. MANAGER PANOURI, ALINIERE & BACKUP / IMPORT -->
+        <!-- 3. WIDGET MANAGER, ARRANGEMENT & BACKUP / IMPORT -->
         <div class="glass-pill relative flex items-center gap-1 p-1 rounded-2xl">
           <button
             id="widgets-manager-btn"
             type="button"
             class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-white/85 hover:text-white hover:bg-white/10 transition-all"
-            title="Arată sau ascunde panourile din spațiul curent"
+            title="Show or hide widgets in the current workspace"
+            aria-label="Widgets"
           >
             <svg class="w-3.5 h-3.5 text-accent-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
-            <span>Panouri</span>
+            <span class="hidden sm:inline">Widgets</span>
             <span id="widgets-count-badge" class="rounded-md bg-white/15 px-1.5 text-[10px] font-mono">3/3</span>
           </button>
 
@@ -158,19 +150,29 @@
             id="auto-arrange-btn"
             type="button"
             class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-white/75 hover:text-white hover:bg-white/10 transition-all"
-            title="Aliniază ordonat toate panourile din spațiul curent"
+            title="Arrange all widgets in the current workspace"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
             </svg>
-            <span class="hidden sm:inline">Aliniază</span>
+            <span class="hidden sm:inline">Arrange</span>
+          </button>
+
+          <button
+            id="lock-layout-btn"
+            type="button"
+            class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-white/75 hover:text-white hover:bg-white/10 transition-all"
+            title="Lock or unlock widget positions and sizes"
+          >
+            <span id="lock-layout-icon" aria-hidden="true">🔓</span>
+            <span id="lock-layout-label" class="hidden sm:inline">Lock</span>
           </button>
 
           <button
             id="backup-menu-btn"
             type="button"
             class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium text-white/75 hover:text-white hover:bg-white/10 transition-all"
-            title="Backup JSON și import de bookmark-uri din browser"
+            title="JSON backup and browser bookmark import"
           >
             <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
@@ -181,12 +183,12 @@
           <!-- Popover Manager Panouri -->
           <div
             id="widgets-manager-popover"
-            class="hidden absolute left-0 top-full mt-2 w-72 glass-panel rounded-2xl p-3.5 shadow-2xl z-50"
+            class="hidden absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] glass-panel rounded-2xl p-3.5 shadow-2xl z-50"
           >
             <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-white/10">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-white/70">Panouri în acest spațiu</span>
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-white/70">Widgets in this workspace</span>
               <button id="show-all-widgets-btn" type="button" class="text-[11px] text-accent-400 hover:underline">
-                Arată toate
+                Show all
               </button>
             </div>
             <div id="widgets-manager-list" class="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar pr-1"></div>
@@ -195,12 +197,12 @@
           <!-- Popover Backup (Export / Import JSON) + Import Bookmark-uri -->
           <div
             id="backup-popover"
-            class="hidden absolute right-0 top-full mt-2 w-80 glass-panel rounded-2xl p-4 shadow-2xl z-50 space-y-3"
+            class="hidden absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] glass-panel rounded-2xl p-4 shadow-2xl z-50 space-y-3"
           >
             <div>
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-white/80">Backup Date (JSON)</h3>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-white/80">Data Backup (JSON)</h3>
               <p class="text-[11px] text-white/50 mt-0.5">
-                Toate spațiile de lucru, link-urile, sarcinile, notițele, setările și imaginea de fundal proprie.
+                All workspaces, links, tasks, notes, settings, and custom background.
               </p>
             </div>
             <div class="flex flex-col gap-2">
@@ -212,7 +214,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span>Descarcă Backup (.json)</span>
+                <span>Download Backup (.json)</span>
               </button>
 
               <label
@@ -222,15 +224,50 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                <span>Restaurează din Backup (.json)</span>
+                <span>Restore from Backup (.json)</span>
               </label>
               <input id="import-json-input" type="file" accept=".json,application/json" class="hidden" />
             </div>
 
+            <div class="pt-3 border-t border-white/10 space-y-2">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-white/80">Auto-Sync File (.json)</h3>
+                <span id="autosync-status-badge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/60">Off</span>
+              </div>
+              <p id="autosync-status-text" class="text-[11px] text-white/50">
+                Link a local .json file (e.g. in OneDrive) to auto-save every change across browsers.
+              </p>
+              <div class="flex gap-1.5">
+                <button
+                  id="autosync-connect-btn"
+                  type="button"
+                  class="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-accent-500/20 hover:bg-accent-500/30 border border-accent-400/30 px-2.5 py-1.5 text-xs font-medium text-accent-200 transition-colors"
+                >
+                  <span>🔗 Connect File</span>
+                </button>
+                <button
+                  id="autosync-now-btn"
+                  type="button"
+                  class="hidden rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 px-2.5 py-1.5 text-xs font-medium text-sky-200 transition-colors"
+                  title="Write current state to the linked file now"
+                >
+                  Sync
+                </button>
+                <button
+                  id="autosync-disconnect-btn"
+                  type="button"
+                  class="hidden rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-400/30 px-2.5 py-1.5 text-xs font-medium text-rose-200 transition-colors"
+                  title="Disconnect auto-sync file"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
             <div class="pt-3 border-t border-white/10">
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-white/80">Bookmark-uri din browser</h3>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-white/80">Browser bookmarks</h3>
               <p class="text-[11px] text-white/50 mt-0.5 mb-2">
-                Exportă marcajele din Chrome/Firefox (fișier .html), apoi încarcă-l aici. Fiecare folder devine un subgrup.
+                Export bookmarks from Chrome/Firefox as an .html file, then upload it here. Each folder becomes a subgroup.
               </p>
               <label
                 for="import-bookmarks-input"
@@ -239,7 +276,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
-                <span>Importă bookmark-uri (.html)</span>
+                <span>Import Bookmarks (.html)</span>
               </label>
               <input id="import-bookmarks-input" type="file" accept=".html,.htm,text/html" class="hidden" />
             </div>
@@ -247,20 +284,20 @@
         </div>
       </div>
 
-      <!-- Dreapta: Widget Vreme în colț -->
+      <!-- Right: corner weather widget -->
       <div id="widget-weather" class="glass-panel relative flex items-center gap-3 px-3.5 py-1.5 rounded-2xl transition-all duration-300">
         <div id="weather-icon" class="text-xl leading-none select-none" aria-hidden="true">☀️</div>
         <div class="flex flex-col">
           <div class="flex items-baseline gap-2">
             <span id="weather-temp" class="font-mono text-sm sm:text-base font-semibold tracking-tight text-white">17°C</span>
-            <span id="weather-desc" class="text-[11px] text-white/75">Senin</span>
+            <span id="weather-desc" class="hidden sm:inline text-[11px] text-white/75">Clear</span>
           </div>
           <div class="flex items-center gap-1.5">
             <button
               id="weather-city-btn"
               type="button"
               class="text-[11px] font-medium text-white/80 hover:text-white flex items-center gap-1 transition-colors"
-              title="Schimbă orașul"
+              title="Change city"
             >
               <svg class="w-3 h-3 text-accent-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -268,26 +305,26 @@
               </svg>
               <span id="weather-city">Sibiu</span>
             </button>
-            <span class="text-white/30 text-[10px]">•</span>
-            <span id="weather-wind" class="text-[10px] text-white/60">10 km/h</span>
+            <span class="hidden sm:inline text-white/30 text-[10px]">•</span>
+            <span id="weather-wind" class="hidden sm:inline text-[10px] text-white/60">10 km/h</span>
           </div>
         </div>
 
-        <!-- Popover schimbare oraș Vreme -->
+        <!-- Weather city selector popover -->
         <div
           id="weather-city-popover"
           class="hidden absolute right-0 top-full mt-2 w-60 glass-panel rounded-2xl p-3 shadow-2xl z-50"
         >
-          <p class="text-[11px] font-medium uppercase tracking-wider text-white/60 mb-2">Selectează orașul</p>
+          <p class="text-[11px] font-medium uppercase tracking-wider text-white/60 mb-2">Select a city</p>
           <div id="weather-city-list" class="grid grid-cols-2 gap-1.5 text-xs"></div>
         </div>
       </div>
     </header>
 
-    <!-- ==================== ZONA CENTRALĂ: Ceas, Dată, Săptămână, Căutare & Canvas ==================== -->
+    <!-- ==================== CENTER: Clock, Date, Week, Search & Canvas ==================== -->
     <main class="relative flex-1 flex flex-col items-center pt-1 pb-3">
 
-      <section class="relative z-30 flex flex-col items-center text-center mb-4 w-full max-w-xl">
+      <section class="hero-section relative z-30 flex flex-col items-center text-center mb-4 w-full max-w-xl">
         <div class="relative flex items-baseline justify-center">
           <time
             id="clock-time"
@@ -301,35 +338,35 @@
         </div>
 
         <div class="mt-1 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm text-white/85 drop-shadow">
-          <span id="clock-date" class="font-medium capitalize">Luni, 2 Noiembrie 2026</span>
+          <span id="clock-date" class="font-medium capitalize">Monday, November 2, 2026</span>
           <span
             id="clock-week"
             class="font-mono text-xs font-semibold text-accent-300 bg-accent-400/15 border border-accent-400/30 px-2.5 py-0.5 rounded-full shadow-sm"
-            title="Numărul săptămânii din an (standard ISO 8601)"
+            title="Week number of the year (ISO 8601 standard)"
           >
-            Săptămâna 45
+            Week 45
           </span>
           <span class="text-white/30">•</span>
           <span>
-            <span id="greeting-text">Bună seara</span>,
+            <span id="greeting-text">Good evening</span>,
             <span
               id="user-name"
               contenteditable="true"
               spellcheck="false"
               class="font-semibold border-b border-transparent hover:border-white/40 focus:border-accent-400 focus:outline-none px-1 rounded transition-colors cursor-pointer"
-              title="Click pentru a-ți edita numele"
-            >Explorator</span>
+              title="Click to edit your name"
+            >Explorer</span>
           </span>
         </div>
 
-        <!-- Bară de Căutare Rapidă (Local + Web) -->
+        <!-- Quick search bar (local + web) -->
         <div class="mt-3 w-full max-w-md relative">
           <div class="glass-pill flex items-center gap-2 px-3 py-1.5 rounded-2xl focus-within:border-sky-400/60 transition-colors">
             <button
               id="search-engine-btn"
               type="button"
               class="text-[11px] font-semibold text-sky-300 hover:text-sky-200 bg-sky-400/15 px-2 py-0.5 rounded-lg shrink-0 transition-colors"
-              title="Click pentru a schimba motorul de căutare web (Google / DuckDuckGo / YouTube / GitHub)"
+              title="Click to change the web search engine (Google / DuckDuckGo / YouTube / GitHub)"
             >
               Google
             </button>
@@ -337,7 +374,7 @@
               id="global-search-input"
               type="text"
               autocomplete="off"
-              placeholder="Caută în link-uri, notițe sau pe web... (Ctrl+K)"
+              placeholder="Search links, notes, or the web... (Ctrl+K)"
               class="w-full bg-transparent text-xs text-white placeholder-white/45 focus:outline-none select-text"
             />
             <kbd class="hidden sm:inline-block text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">/</kbd>
@@ -350,43 +387,43 @@
         </div>
       </section>
 
-      <!-- Canvas-ul unde toate panourile din spațiul curent pot fi mutate oriunde -->
+      <!-- Canvas where widgets in the current workspace can be moved anywhere -->
       <section
         id="widgets-canvas"
-        aria-label="Spațiu de lucru cu widget-uri mutabile"
-        class="relative w-full flex-1 min-h-[540px]"
+        aria-label="Workspace canvas with movable widgets"
+        class="relative z-0 w-full flex-1 min-h-[260px]"
       ></section>
     </main>
 
-    <!-- ==================== FOOTER: Fundal, Aspect (temă, accent, sticlă) & Citat ==================== -->
+    <!-- ==================== FOOTER: Background, Appearance (theme, accent, glass) & Quote ==================== -->
     <footer class="relative z-40 flex flex-wrap items-center justify-between gap-3 pt-2">
       <div class="relative flex flex-wrap items-center gap-2">
         <button
           id="change-bg-btn"
           type="button"
           class="glass-pill group flex items-center gap-2 px-3 py-1.5 rounded-2xl text-xs font-medium text-white/85 hover:text-white transition-all"
-          title="Schimbă imaginea de fundal"
+          title="Change background image"
         >
           <svg class="w-3.5 h-3.5 text-accent-400 transition-transform duration-500 group-hover:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span>Schimbă Fundalul</span>
+          <span>Change Background</span>
         </button>
 
         <button
           id="toggle-bg-mode-btn"
           type="button"
           class="glass-pill px-2.5 py-1.5 rounded-2xl text-xs text-white/70 hover:text-white transition-colors"
-          title="Comută între fotografie Unsplash, Gradient și imagine proprie"
+          title="Switch between Unsplash photos, gradients, and custom images"
         >
-          Mod: <span id="bg-mode-label" class="font-medium text-white">Foto Unsplash</span>
+          Mode: <span id="bg-mode-label" class="font-medium text-white">Unsplash Photo</span>
         </button>
 
         <button
           id="visual-settings-btn"
           type="button"
           class="glass-pill flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl text-xs text-white/80 hover:text-white transition-colors"
-          title="Temă, culoare de accent, fundal propriu și efect de sticlă"
+          title="Theme, accent color, custom background, and glass effect"
         >
           <svg class="w-3.5 h-3.5 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
@@ -394,47 +431,78 @@
           <span>Aspect</span>
         </button>
 
+        <button
+          id="toggle-widgets-btn"
+          type="button"
+          aria-pressed="false"
+          class="glass-pill flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl text-xs text-white/80 hover:text-white transition-colors"
+          title="Hide the widgets to enjoy the background (click again to bring them back)"
+        >
+          <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span id="toggle-widgets-label" class="hidden sm:inline">Hide widgets</span>
+        </button>
+
         <span id="bg-location-label" class="hidden xl:inline-block text-xs text-white/60 pl-1 drop-shadow">
-          📍 Yosemite Valley — Unsplash
+          📍 Automotive Night Drive (4K) — Unsplash
         </span>
 
-        <!-- Popover Setări Vizuale -->
+        <!-- Visual Settings popover -->
         <div
           id="visual-settings-popover"
-          class="hidden absolute left-0 bottom-full mb-2 w-80 max-h-[75vh] overflow-y-auto custom-scrollbar glass-panel rounded-2xl p-4 shadow-2xl z-50 space-y-3.5"
+          class="hidden absolute left-0 bottom-full mb-2 w-80 max-w-[calc(100vw-2rem)] max-h-[75vh] overflow-y-auto custom-scrollbar glass-panel rounded-2xl p-4 shadow-2xl z-50 space-y-3.5"
         >
           <div class="flex items-center justify-between border-b border-white/10 pb-2">
             <h3 class="text-xs font-semibold uppercase tracking-wider text-white/85">Aspect</h3>
             <button id="reset-visual-settings-btn" type="button" class="text-[11px] text-sky-300 hover:underline">
-              Resetează
+              Reset
             </button>
           </div>
 
-          <!-- Temă: Întunecată / Luminoasă -->
+          <!-- Theme: Dark / Light / Auto -->
           <div>
-            <span class="block text-[11px] font-medium text-white/75 mb-1">Temă panouri</span>
-            <div class="grid grid-cols-2 gap-1 rounded-xl bg-black/25 p-1">
-              <button type="button" data-theme-option="dark" class="theme-option-btn rounded-lg px-2 py-1 text-xs">🌙 Întunecată</button>
-              <button type="button" data-theme-option="light" class="theme-option-btn rounded-lg px-2 py-1 text-xs">☀️ Luminoasă</button>
+            <span class="block text-[11px] font-medium text-white/75 mb-1">Panel theme</span>
+            <div class="grid grid-cols-3 gap-1 rounded-xl bg-black/25 p-1">
+              <button type="button" data-theme-option="dark" class="theme-option-btn rounded-lg px-2 py-1 text-xs">🌙 Dark</button>
+              <button type="button" data-theme-option="light" class="theme-option-btn rounded-lg px-2 py-1 text-xs">☀️ Light</button>
+              <button type="button" data-theme-option="auto" class="theme-option-btn rounded-lg px-2 py-1 text-xs">💻 Auto</button>
             </div>
           </div>
 
-          <!-- Culoare de accent -->
+          <!-- Background category filter & daily auto-rotate -->
+          <div class="space-y-2 pt-1 border-t border-white/10">
+            <span class="block pt-1 text-[11px] font-medium text-white/75">Background theme category</span>
+            <div id="bg-category-buttons" class="grid grid-cols-2 gap-1 rounded-xl bg-black/25 p-1">
+              <button type="button" data-bg-category="all" class="bg-category-btn rounded-lg px-2 py-1 text-[11px]">✨ All</button>
+              <button type="button" data-bg-category="automotive" class="bg-category-btn rounded-lg px-2 py-1 text-[11px]">🚗 Automotive</button>
+              <button type="button" data-bg-category="software" class="bg-category-btn rounded-lg px-2 py-1 text-[11px]">💻 Software</button>
+              <button type="button" data-bg-category="radar" class="bg-category-btn rounded-lg px-2 py-1 text-[11px]">📡 Radar</button>
+              <button type="button" data-bg-category="nature" class="bg-category-btn rounded-lg px-2 py-1 text-[11px]">🌿 Nature</button>
+            </div>
+            <label class="flex items-center justify-between gap-2 text-[11px] text-white/80 cursor-pointer pt-0.5">
+              <span>Auto-change background daily</span>
+              <input id="bg-daily-auto-toggle" type="checkbox" class="custom-checkbox" />
+            </label>
+          </div>
+
+          <!-- Accent color -->
           <div>
-            <span class="block text-[11px] font-medium text-white/75 mb-1.5">Culoare de accent</span>
+            <span class="block text-[11px] font-medium text-white/75 mb-1.5">Accent color</span>
             <div id="accent-swatches" class="flex flex-wrap gap-2"></div>
           </div>
 
-          <!-- Imagine proprie: URL sau fișier din calculator -->
+          <!-- Custom image: URL or local file -->
           <div class="space-y-2 pt-1 border-t border-white/10">
             <label for="custom-bg-url-input" class="block pt-2 text-[11px] font-medium text-white/75">
-              Imagine de fundal proprie (URL sau din PC)
+              Custom background image (URL or from your computer)
             </label>
             <div class="flex gap-1.5">
               <input
                 id="custom-bg-url-input"
                 type="text"
-                placeholder="https://exemplu.ro/imagine-4k.jpg"
+                placeholder="https://example.com/image-4k.jpg"
                 class="flex-1 min-w-0 rounded-xl bg-white/10 border border-white/15 px-2.5 py-1 text-xs text-white placeholder-white/35 focus:border-sky-400 focus:outline-none select-text"
               />
               <button
@@ -442,7 +510,7 @@
                 type="button"
                 class="rounded-xl bg-sky-500 hover:bg-sky-400 px-2.5 py-1 text-xs font-semibold text-slate-950 transition-colors"
               >
-                Aplică
+                Apply
               </button>
             </div>
             <label
@@ -452,15 +520,15 @@
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Alege imagine din calculator...</span>
+              <span>Choose an image from your computer...</span>
             </label>
             <input id="local-bg-file-input" type="file" accept="image/*" class="hidden" />
           </div>
 
-          <!-- Slider Întunecare Fundal -->
+          <!-- Background dimming slider -->
           <div>
             <div class="flex justify-between text-[11px] text-white/75 mb-1">
-              <span>Întunecare fundal</span>
+              <span>Background overlay</span>
               <span id="overlay-dim-val" class="font-mono text-white/90">22%</span>
             </div>
             <input id="overlay-dim-slider" type="range" min="0" max="85" step="2" class="w-full accent-slider cursor-pointer" />
@@ -469,16 +537,16 @@
           <!-- Slider Opacitate Panouri -->
           <div>
             <div class="flex justify-between text-[11px] text-white/75 mb-1">
-              <span>Opacitate panouri</span>
+              <span>Panel opacity</span>
               <span id="glass-opacity-val" class="font-mono text-white/90">56%</span>
             </div>
-            <input id="glass-opacity-slider" type="range" min="20" max="90" step="2" class="w-full accent-slider cursor-pointer" />
+            <input id="glass-opacity-slider" type="range" min="0" max="90" step="2" class="w-full accent-slider cursor-pointer" />
           </div>
 
-          <!-- Slider Blur Sticlă -->
+          <!-- Glass blur slider -->
           <div>
             <div class="flex justify-between text-[11px] text-white/75 mb-1">
-              <span>Blur sticlă (panouri)</span>
+              <span>Glass blur (panels)</span>
               <span id="glass-blur-val" class="font-mono text-white/90">22px</span>
             </div>
             <input id="glass-blur-slider" type="range" min="4" max="40" step="2" class="w-full accent-slider cursor-pointer" />
@@ -488,19 +556,19 @@
 
       <!-- Indiciu discret -->
       <div class="hidden lg:flex items-center gap-1.5 text-[11px] text-white/55 drop-shadow">
-        <span>Trage panourile de bara de sus • trage link-urile și sarcinile între liste • Ctrl+Z anulează ștergerea</span>
+        <span>Drag widgets by their top bar • drag links and tasks between lists • Ctrl+Z undoes deletion</span>
       </div>
 
-      <!-- Citat motivațional -->
-      <div class="flex items-center gap-2 text-xs text-white/75 max-w-md drop-shadow">
-        <p id="daily-quote" class="italic truncate">
-          „Simplitatea este sofisticarea supremă.” — Leonardo da Vinci
+      <!-- Motivational quote -->
+      <div class="flex min-w-0 max-w-full sm:max-w-md items-center gap-2 text-xs text-white/75 drop-shadow">
+        <p id="daily-quote" class="min-w-0 italic truncate">
+          “Simplicity is the ultimate sophistication.” — Leonardo da Vinci
         </p>
         <button
           id="next-quote-btn"
           type="button"
           class="p-1.5 rounded-xl hover:bg-white/10 text-white/50 hover:text-white transition-colors shrink-0"
-          title="Alt citat"
+          title="Next quote"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -511,7 +579,7 @@
 
   </div>
 
-  <!-- Scriptul Principal al Aplicației -->
+  <!-- Main application script -->
   <script src="app.js"></script>
 </body>
 </html>

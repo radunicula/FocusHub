@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="10" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)" stroke="url(#accent)" stroke-width="2.5"/>
+  <!-- Outer radar focus ring -->
+  <circle cx="32" cy="32" r="19" stroke="url(#accent)" stroke-width="2.2" stroke-opacity="0.35"/>
+  <!-- Inner radar ring -->
+  <circle cx="32" cy="32" r="11" stroke="url(#accent)" stroke-width="2.2" stroke-opacity="0.7"/>
+  <!-- Radar sweep sector -->
+  <path d="M32 32 L32 13 A19 19 0 0 1 48.5 22.5 Z" fill="url(#accent)" fill-opacity="0.28"/>
+  <!-- Sweep needle -->
+  <line x1="32" y1="32" x2="45.5" y2="21.5" stroke="#34d399" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- Focus crosshair ticks -->
+  <line x1="32" y1="9" x2="32" y2="14" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="32" y2="55" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="9" y1="32" x2="14" y2="32" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="50" y1="32" x2="55" y2="32" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+  <!-- Center hub core -->
+  <circle cx="32" cy="32" r="4.2" fill="url(#accent)"/>
+</svg>
